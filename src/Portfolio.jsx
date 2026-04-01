@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Github,
   Linkedin,
@@ -120,6 +120,83 @@ const accentIcon = {
   sparkle: Sparkles,
   code: Code2,
   cpu: Cpu,
+}
+
+const TERM_COMMAND = 'cat ./identity.txt'
+const TERM_OUTPUT =
+  '→ CS @ UTA · ML & NLP pipelines · wildlife AI research · SWE VP'
+
+const TypingCursor = () => (
+  <span
+    className="ml-0.5 inline-block h-3 w-px animate-pulse bg-fuchsia-500 align-middle dark:bg-fuchsia-400"
+    aria-hidden
+  />
+)
+
+const HeroTerminal = ({ isDark }) => {
+  const [cmd, setCmd] = useState('')
+  const [out, setOut] = useState('')
+  const [phase, setPhase] = useState('cmd')
+
+  useEffect(() => {
+    let cancelled = false
+    const reduceMotion =
+      typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const speed = reduceMotion ? 0 : 34
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+    ;(async () => {
+      if (reduceMotion) {
+        if (!cancelled) {
+          setCmd(TERM_COMMAND)
+          setOut(TERM_OUTPUT)
+          setPhase('done')
+        }
+        return
+      }
+      for (let i = 0; i <= TERM_COMMAND.length && !cancelled; i++) {
+        setCmd(TERM_COMMAND.slice(0, i))
+        await sleep(speed)
+      }
+      if (cancelled) return
+      setPhase('out')
+      for (let j = 0; j <= TERM_OUTPUT.length && !cancelled; j++) {
+        setOut(TERM_OUTPUT.slice(0, j))
+        await sleep(speed)
+      }
+      if (cancelled) return
+      setPhase('done')
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  return (
+    <div className="corner-tech relative overflow-hidden rounded-xl border border-rose-200/90 bg-gradient-to-br from-rose-950/[0.04] via-white/60 to-fuchsia-50/40 px-4 py-3 text-left shadow-lg shadow-rose-200/25 backdrop-blur-md dark:border-fuchsia-500/20 dark:from-slate-900/90 dark:via-slate-900/70 dark:to-fuchsia-950/40 dark:shadow-fuchsia-900/20">
+      <div className="mb-2 flex items-center gap-2 border-b border-rose-200/60 pb-2 font-mono text-[10px] text-rose-500 sm:text-[11px] dark:border-white/10 dark:text-rose-400">
+        <Terminal className="h-3.5 w-3.5 shrink-0 text-fuchsia-500 dark:text-fuchsia-400" strokeWidth={2} aria-hidden />
+        <span className="truncate">sanjana@portfolio:~$</span>
+        {!isDark && <span className="ml-auto hidden text-rose-300/80 sm:inline">utf-8 · light</span>}
+        {isDark && <span className="ml-auto hidden text-violet-300/90 sm:inline">utf-8 · dark</span>}
+      </div>
+      <p className="min-h-[1.25rem] font-mono text-xs text-fuchsia-700/95 sm:min-h-[1.5rem] sm:text-sm dark:text-fuchsia-300">
+        <span className="text-rose-400 dark:text-rose-400">$</span> {cmd}
+        {phase === 'cmd' && <TypingCursor />}
+      </p>
+      <p className="mt-2 min-h-[2.5rem] pl-1 font-mono text-[11px] leading-relaxed text-rose-900/85 sm:min-h-[2.75rem] sm:text-xs dark:text-rose-200/90">
+        {out}
+        {phase === 'out' && <TypingCursor />}
+      </p>
+      {phase === 'done' && (
+        <p className="mt-3 flex items-center gap-1 font-mono text-[11px] text-rose-400/70 dark:text-fuchsia-400/80">
+          <TypingCursor />
+          <span className="sr-only">Typing complete</span>
+        </p>
+      )}
+    </div>
+  )
 }
 
 const SectionTitle = ({ eyebrow, title, kicker, className = '', accent = 'sparkle' }) => {
@@ -315,25 +392,7 @@ const Portfolio = () => {
             className="animate-fade-up mx-auto mt-10 w-full max-w-lg opacity-0 [animation-fill-mode:forwards]"
             style={{ animationDelay: '0.32s' }}
           >
-            <div className="corner-tech relative overflow-hidden rounded-xl border border-rose-200/90 bg-gradient-to-br from-rose-950/[0.04] via-white/60 to-fuchsia-50/40 px-4 py-3 text-left shadow-lg shadow-rose-200/25 backdrop-blur-md dark:border-fuchsia-500/20 dark:from-slate-900/90 dark:via-slate-900/70 dark:to-fuchsia-950/40 dark:shadow-fuchsia-900/20">
-              <div className="mb-2 flex items-center gap-2 border-b border-rose-200/60 pb-2 font-mono text-[10px] text-rose-500 sm:text-[11px] dark:border-white/10 dark:text-rose-400">
-                <Terminal className="h-3.5 w-3.5 shrink-0 text-fuchsia-500 dark:text-fuchsia-400" strokeWidth={2} aria-hidden />
-                <span className="truncate">sanjana@portfolio:~$</span>
-                <span className="ml-auto hidden text-rose-300/80 sm:inline dark:hidden">utf-8 · light</span>
-                <span className="ml-auto hidden text-violet-300/90 sm:dark:inline">utf-8 · dark</span>
-              </div>
-              <p className="font-mono text-xs text-fuchsia-700/95 sm:text-sm dark:text-fuchsia-300">
-                <span className="text-rose-400 dark:text-rose-400">$</span> cat ./identity.txt
-              </p>
-              <p className="mt-2 pl-1 font-mono text-[11px] leading-relaxed text-rose-900/85 sm:text-xs dark:text-rose-200/90">
-                <span className="text-rose-500/80 dark:text-fuchsia-400/90">→</span> CS @ UTA · ML &amp; NLP pipelines ·
-                wildlife AI research · SWE VP
-              </p>
-              <p className="mt-3 flex items-center gap-1 font-mono text-[11px] text-rose-400/70 dark:text-fuchsia-400/80">
-                <span className="inline-block h-3 w-px animate-pulse bg-fuchsia-400 dark:bg-fuchsia-300" aria-hidden />
-                <span className="sr-only">Cursor</span>
-              </p>
-            </div>
+            <HeroTerminal isDark={darkMode} />
           </div>
 
           <p
